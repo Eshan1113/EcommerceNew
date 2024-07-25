@@ -237,4 +237,43 @@ if($validator->passes()){
             ]);
         }
     }
+
+    public function showChangePasswordForm(){
+        return view('front.account.change-password');
+    }
+
+    public function changePassword(Request $request){
+        $validator = Validator::make($request->all(),[
+            'old_password' => 'required',
+            'new_password' => 'required|min:5',
+            'confirm_password' => 'required|same:new_password',
+        ]);
+    
+        if($validator->fails()){
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ]);
+        }
+    
+        $user = User::select('id', 'password')->where('id', Auth::user()->id)->first();
+        if(!Hash::check($request->old_password, $user->password)){
+            return response()->json([
+                'status' => false,
+                'errors' => ['old_password' => 'Your old password is incorrect, please try again.']
+            ]);
+        }
+    
+        User::where('id', $user->id)->update([
+            'password' => Hash::make($request->new_password)
+        ]);
+    
+        session()->flash('success', 'You have successfully changed your password.');
+    
+        return response()->json([
+            'status' => true,
+            'message' => 'Password changed successfully.'
+        ]);
+    }
+    
 }

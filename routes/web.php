@@ -6,12 +6,15 @@ use App\Http\Controllers\admin\HomeController;
 use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\DiscountCodeController;
 use App\Http\Controllers\admin\OrderController;
+use App\Http\Controllers\admin\PageController;
 use App\Http\Controllers\admin\ProductController;
 use App\Http\Controllers\admin\ProductImageController;
 use App\Http\Controllers\admin\ProductSubCategoryController;
+use App\Http\Controllers\admin\SettingController;
 use App\Http\Controllers\admin\ShippingController;
 use App\Http\Controllers\admin\SubCategoryController;
 use App\Http\Controllers\admin\TempImagesController;
+use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\FrontController;
@@ -46,6 +49,7 @@ Route::post('/add-to-wishlist', [FrontController::class, 'addToWishlist'])->name
 
 
 Route::get('/thanks/{orderId}',[CartController::class,'thankyou'])->name('front.thankyou');
+Route::get('/page/{slug}',[FrontController::class,'page'])->name('front.page');
 
 
 
@@ -67,11 +71,17 @@ Route::get('/thanks/{orderId}',[CartController::class,'thankyou'])->name('front.
         Route::get('/profile',[AuthController::class,'profile'])->name('account.profile');
         Route::post('/update-profile',[AuthController::class,'updateProfile'])->name('account.updateProfile');
         Route::post('/update-address',[AuthController::class,'updateAddress'])->name('account.updateAddress');
+        Route::get('/change-password',[AuthController::class,'showChangePasswordForm'])->name('account.showChangePasswordForm');
+        Route::post('/process-change-password',[AuthController::class,'changePassword'])->name('account.processChangePassword');
+
+
+
         Route::get('/my-orders',[AuthController::class,'orders'])->name('account.orders');
         Route::get('/my-wishlist',[AuthController::class,'wishlist'])->name('account.wishlist');
         Route::post('/remove-product-from-wishlist',[AuthController::class,'removeProductFromWishlist'])->name('account.removeProductFromWishlist');
         Route::get('/order-detail/{orderId}',[AuthController::class,'orderDetail'])->name('account.orderDetail');
         Route::get('/logout',[AuthController::class,'logout'])->name('account.logout');
+        
     });
 
 });
@@ -155,6 +165,31 @@ Route::get('/orders',  [OrderController::class, 'index'])->name('orders.index');
 Route::get('/orders/{id}',  [OrderController::class, 'detail'])->name('orders.detail');
 Route::post('/order/change-status/{id}',  [OrderController::class, 'changeOrderStatus'])->name('orders.changeOrderStatus');
 Route::post('/order/send-email/{id}',  [OrderController::class, 'sendInvoiceEmail'])->name('orders.sendInvoiceEmail');
+
+
+
+//user routes
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
+Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+Route::post('/users', [UserController::class, 'store'])->name('users.store');
+
+Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
+Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
+Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+//page routes
+Route::get('/pages', [PageController::class, 'index'])->name('pages.index');
+Route::get('/pages/create', [PageController::class, 'create'])->name('pages.create');
+Route::post('/pages', [PageController::class, 'store'])->name('pages.store');
+
+Route::get('/pages/{page}/edit', [PageController::class, 'edit'])->name('pages.edit');
+Route::put('/pages/{page}', [PageController::class, 'update'])->name('pages.update');
+Route::delete('/pages/{page}', [PageController::class, 'destroy'])->name('pages.destroy');
+
+//settings route
+Route::get('/change-password', [SettingController::class, 'showChangePasswordForm'])->name('admin.showChangePasswordForm');
+//processChangePassword
+Route::post('/process-change-password', [SettingController::class, 'processChangePassword'])->name('admin.processChangePassword');
        // Route for slug generation
         Route::get('/getSlug', function(Request $request) {
             $slug = '';
