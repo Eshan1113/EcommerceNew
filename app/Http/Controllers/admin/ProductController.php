@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Image;
 use App\Http\Controllers\admin\File;
+use App\Models\ProductRating;
 use Illuminate\Support\Facades\File as FacadesFile; // Add this line to resolve the File facade issue
 
 class ProductController extends Controller
@@ -256,4 +257,48 @@ class ProductController extends Controller
         'status' => true
      ]);
     }
+
+    public function productRatings(Request $request)
+    {
+        $ratings = ProductRating::select('product_ratings.*', 'products.title as productTitle')
+            ->leftJoin('products', 'products.id', '=', 'product_ratings.product_id')
+            ->orderBy('product_ratings.created_at', 'DESC');
+    
+        if (!empty($request->get('keyword'))) {
+            $keyword = $request->get('keyword');
+            $ratings = $ratings->where(function ($query) use ($keyword) {
+                $query->where('products.title', 'like', '%' . $keyword . '%')
+                      ->orWhere('product_ratings.username', 'like', '%' . $keyword . '%');
+            });
+        }
+    
+        $ratings = $ratings->paginate(10);
+    
+        return view('admin.products.ratings', [
+            'ratings' => $ratings
+        ]);
+    }
+    
+
+    public function changeRatingStatus(Request $request)
+{
+    $productRating = ProductRating::find($request->id);
+
+    if ($productRating) {
+        $productRating->status = $request->status;
+        $productRating->save();
+
+        session()->flash('success', 'Status changed successfully');
+        return response()->json([
+            'status' => true
+        ]);
+    } else {
+        return response()->json([
+            'status' => false,
+            'message' => 'Rating not found'
+        ]);
+    }
+}
+
+    
 }
